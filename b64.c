@@ -90,27 +90,25 @@ int main(int argc, char **argv)
 	fstat(fileno(stdin), &stats);
 	int stats_mode = stats.st_mode;
 	FILE *stream = fdopen(STDIN_FILENO, "r");
-	// if (S_ISFIFO(stats_mode)) { // piped in
-	// 	fseek(stream, 0, SEEK_END);
-	// 	int len = ftell(stream);
-	// 	rewind(stream);
-	// 	printf("I'm fifo - len=%d\n", len);
-	// } else if (S_ISCHR(stats_mode)) { // REPL
-	if (S_ISFIFO(stats_mode) || S_ISCHR(stats_mode)) { // piped in
+	// S_ISFIFO(stats_mode) - piped in
+	// S_ISCHR(stats_mode) - REPL
+	// S_ISREG(stats_mode) - file directed in as stdin, eg ./a.out < file
+	if (S_ISCHR(stats_mode) || S_ISFIFO(stats_mode)) {
 		int is_newline = 0;
 		char buf[MAX_STR];
 		int ctr = 0;
 		while (1) {
 			char c = fgetc(stream);
-			if (c != '\n') {
+			if (c != '\n' && c != EOF) {
 				buf[ctr] = c;
 				++ctr;
 			} else {
 				encode(buf, ctr);
 				ctr=0;
+				if (S_ISFIFO(stats_mode)) break;
 			}
 		}
-	} else { // file directed in as stdin, eg ./a.out < file
+	} else if (S_ISREG(stats_mode)) {
 		fseek(stream, 0, SEEK_END);
 		int len = ftell(stream);
 		rewind(stream);
