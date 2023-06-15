@@ -6,6 +6,9 @@
 #define MAX_STR 256
 #define B64T "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 
+// TODO: cleanup funcs and naming
+// TODO: implement decoding
+
 // borrowed from tsoding
 const char *shift(int *argc, char ***argv)
 {
