@@ -4,7 +4,7 @@
 #include <unistd.h>
 
 #define MAX_STR 256
-#define B64T "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
+#define B64T "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 
 // borrowed from tsoding
 const char *shift(int *argc, char ***argv)
@@ -23,6 +23,15 @@ int my_strcmp(const char *s1, const char *s2)
 		if (s1[i] == '\0') return 0;
 	return s1[i] - s2[i];
 }
+
+int my_strlen(const char *s)
+{
+	int i = 0;
+	while (*s++ != '\0')
+		++i;
+	return i;
+}
+
 
 void mseti(int *dst, int v, size_t size)
 {
@@ -106,16 +115,27 @@ int main(int argc, char **argv)
 {
 	shift(&argc, &argv); // shift program name
 	const char *action = "";
-	while (argc > 0) {
+	if (argc > 0) {
 		action = shift(&argc, &argv);
 	}
 	const int is_encode = !my_strcmp(action, "encode");
 	const int is_decode = !my_strcmp(action, "decode");
 
 	if (!is_encode && !is_decode) {
-		printf("unknown action\n");
+		printf("unknown action: %s\n", action);
 		exit(1);
 	}
+	
+	// <action> the provided cmdline args
+	int from_cmd = 0;
+	while (argc > 0) {
+		++from_cmd;
+		const char *arg = shift(&argc, &argv);
+		size_t arglen = my_strlen(arg);
+		if (is_encode) encode((char *)arg, arglen);
+		// if (is_decode) decode(arg, arglen);
+	}
+	if (from_cmd) exit(0);
 
 	struct stat stats;
 	fstat(fileno(stdin), &stats);
