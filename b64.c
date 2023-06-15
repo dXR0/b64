@@ -73,16 +73,14 @@ void encode(char *buf, int ctr)
 	bs_size += 2*padding;
 	int bs[bs_size];
 	mseti(bs, 0, bs_size);
-	// print_binaryi(bs, bs_size);
+	print_binaryi(bs, bs_size);
 	stob(bs, buf, ctr);
-	// print_binaryi(bs, bs_size);
+	print_binaryi(bs, bs_size);
 	size_t b64_size = bs_size/6 + padding + (padding > 0) + 1; // non-zero padding means extra char; +1 for '\0'
 	char b64[b64_size];
 	msetc(b64, '\0', b64_size);
-	// printf("%s\n", b64);
-	// print_binaryc(b64, b64_size);
 	btos(b64, bs, bs_size, padding);
-	// print_binaryc(b64, b64_size);
+	print_binaryc(b64, b64_size);
 	printf("%s\n", b64);
 }
 
@@ -113,6 +111,9 @@ int main(int argc, char **argv)
 		int len = ftell(stream);
 		rewind(stream);
 		printf("Directed to me - len=%d\n", len);
+		char buf[len];
+		fgets(buf, len, stream);
+		encode(buf, len-1); // -1 len, because I guess of EOF
 	}
 	return fclose(stream);
 }
