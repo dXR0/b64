@@ -7,6 +7,8 @@
 #define B64T "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 
 // TODO: cleanup funcs and naming/refactor
+// TODO: test and bugfix
+// FIXME: longer values are improperly coded. Try ./a.out encode "lorem ipsum" | ./a.out decode
 
 // borrowed from tsoding
 const char *shift(int *argc, char ***argv)
@@ -101,7 +103,7 @@ void encode(char *buf, int ctr)
 	char b64[b64_size];
 	msetc(b64, '\0', b64_size);
 	ebtos(b64, bs, bs_size, padding);
-	printf("%s\n", b64);
+	printf("%s", b64);
 }
 
 void dstob(int bs[], char *ss, size_t ss_size)
@@ -163,7 +165,7 @@ void decode(char *buf, int ctr)
 	char ss[ss_size];
 	msetc(ss,'\0', ss_size);
 	dbtos(ss, bs, bs_size);
-	printf("%s\n", ss);
+	printf("%s", ss);
 }
 
 
@@ -192,7 +194,10 @@ int main(int argc, char **argv)
 		if (is_encode) encode((char *)arg, arglen);
 		else if (is_decode) decode((char *)arg, arglen);
 	}
-	if (from_cmd) exit(0);
+	if (from_cmd) {
+		printf("\n");
+		exit(0);
+	}
 
 	struct stat stats;
 	fstat(fileno(stdin), &stats);
@@ -239,5 +244,6 @@ int main(int argc, char **argv)
 		if (is_encode) encode(buf, len-1); // -1 len, because I guess of EOF
 		else if (is_decode) decode(buf, len-1); // -1 len, because I guess of EOF
 	}
+	printf("\n");
 	return fclose(stream);
 }
