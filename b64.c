@@ -6,6 +6,24 @@
 #define MAX_STR 256
 #define B64T "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
 
+// borrowed from tsoding
+const char *shift(int *argc, char ***argv)
+{
+    // assert(*argc > 0);
+    const char *result = *argv[0];
+    *argc -= 1;
+    *argv += 1;
+    return result;
+}
+
+int my_strcmp(const char *s1, const char *s2)
+{
+	int i;
+	for (i=0; s1[i] == s2[i]; ++i)
+		if (s1[i] == '\0') return 0;
+	return s1[i] - s2[i];
+}
+
 void mseti(int *dst, int v, size_t size)
 {
 	for (int i=0; i < size; ++i) {
@@ -86,6 +104,19 @@ void encode(char *buf, int ctr)
 
 int main(int argc, char **argv)
 {
+	shift(&argc, &argv); // shift program name
+	const char *action = "";
+	while (argc > 0) {
+		action = shift(&argc, &argv);
+	}
+	const int is_encode = !my_strcmp(action, "encode");
+	const int is_decode = !my_strcmp(action, "decode");
+
+	if (!is_encode && !is_decode) {
+		printf("unknown action\n");
+		exit(1);
+	}
+
 	struct stat stats;
 	fstat(fileno(stdin), &stats);
 	int stats_mode = stats.st_mode;
@@ -93,7 +124,20 @@ int main(int argc, char **argv)
 	// S_ISFIFO(stats_mode) - piped in
 	// S_ISCHR(stats_mode) - REPL
 	// S_ISREG(stats_mode) - file directed in as stdin, eg ./a.out < file
-	if (S_ISCHR(stats_mode) || S_ISFIFO(stats_mode)) {
+	if (S_ISFIFO(stats_mode)) {
+		char buf[MAX_STR];
+		int ctr = 0;
+		while (1) {
+			char c = fgetc(stream);
+			if (c != EOF) {
+				buf[ctr] = c;
+				++ctr;
+			} else {
+				if (is_encode) encode(buf, ctr);
+				break;
+			}
+		}
+	} else if (S_ISCHR(stats_mode)) {
 		int is_newline = 0;
 		char buf[MAX_STR];
 		int ctr = 0;
@@ -103,9 +147,9 @@ int main(int argc, char **argv)
 				buf[ctr] = c;
 				++ctr;
 			} else {
-				encode(buf, ctr);
+				if (is_encode) encode(buf, ctr);
+				// else if (is_decode ) decode(buf, ctr);
 				ctr=0;
-				if (S_ISFIFO(stats_mode)) break;
 			}
 		}
 	} else if (S_ISREG(stats_mode)) {
@@ -114,7 +158,7 @@ int main(int argc, char **argv)
 		rewind(stream);
 		char buf[len];
 		fgets(buf, len, stream);
-		encode(buf, len-1); // -1 len, because I guess of EOF
+		if (is_encode) encode(buf, len-1); // -1 len, because I guess of EOF
 	}
 	return fclose(stream);
 }
