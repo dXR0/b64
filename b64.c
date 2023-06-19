@@ -8,7 +8,6 @@
 
 // TODO: cleanup funcs and naming/refactor
 // TODO: test and bugfix
-// FIXME: longer values are improperly coded. Try ./a.out encode "lorem ipsum" | ./a.out decode
 
 // borrowed from tsoding
 const char *shift(int *argc, char ***argv)
@@ -223,6 +222,7 @@ int main(int argc, char **argv)
 				buf[ctr] = c;
 				++ctr;
 			} else {
+				if (buf[ctr-1] == '\n') --ctr; // if last char is newline, then drop it
 				if (is_encode) encode(buf, ctr);
 				else if (is_decode) decode(buf, ctr);
 				break;
@@ -239,8 +239,9 @@ int main(int argc, char **argv)
 				++ctr;
 			} else {
 				if (is_encode) encode(buf, ctr);
-				else if (is_decode ) decode(buf, ctr);
+				else if (is_decode) decode(buf, ctr);
 				ctr=0;
+				putchar('\n');
 			}
 		}
 	} else if (S_ISREG(stats_mode)) {
@@ -249,8 +250,11 @@ int main(int argc, char **argv)
 		rewind(stream);
 		char buf[len];
 		fgets(buf, len, stream);
-		if (is_encode) encode(buf, len-1); // -1 len, because I guess of EOF
-		else if (is_decode) decode(buf, len-1); // -1 len, because I guess of EOF
+		int ctr = len-1; // -1 len, because I guess of EOF
+		if (buf[ctr-1] == '\n') --ctr; // if last char is newline, then drop it
+		if (is_encode) encode(buf, len-1);
+		else if (is_decode) decode(buf, len-1);
 	}
+	putchar('\n');
 	return fclose(stream);
 }
