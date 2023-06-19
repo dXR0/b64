@@ -56,6 +56,12 @@ void print_binary(int *bs, size_t size)
 	putchar('\n');
 }
 
+void printer(char *ss, size_t size)
+{
+	for (int i=0; i<size; ++i)
+		putchar(ss[i]);
+}
+
 void estob(int bs[], char *ss, size_t ss_size)
 {
 	// first byte of 8 needs to be 0;
@@ -99,10 +105,11 @@ void encode(char *buf, int ctr)
 	// print_binary(bs, bs_size);
 	estob(bs, buf, ctr);
 	// print_binary(bs, bs_size);
-	size_t b64_size = bs_size/6 + padding + (padding > 0) + 1; // non-zero padding means extra char; +1 for '\0'
-	char b64[b64_size];
-	msetc(b64, '\0', b64_size);
+	size_t b64_size = bs_size/6 + padding;
+	char b64[b64_size+1]; // +1 for c-str
+	msetc(b64, '\0', b64_size+1);
 	ebtos(b64, bs, bs_size, padding);
+	// printer(b64, b64_size);
 	printf("%s", b64);
 }
 
@@ -156,15 +163,16 @@ size_t count_padding(char *buf, size_t ctr)
 void decode(char *buf, int ctr)
 {
 	size_t padding = count_padding(buf, ctr);
-	size_t bs_size = (ctr-padding)*6 - (6-padding);
+	size_t ss_size = 6*(ctr-padding)/8;
+	size_t bs_size = ss_size*8;
 	int bs[bs_size];
 	mseti(bs, 0, bs_size);
 	dstob(bs, buf, ctr);
 	// print_binary(bs, bs_size);
-	size_t ss_size = bs_size/8+(bs_size%8!=0)+1; // +1 for '\0'
-	char ss[ss_size];
-	msetc(ss,'\0', ss_size);
+	char ss[ss_size+1]; // +1 for c-str
+	msetc(ss,'\0', ss_size+1);
 	dbtos(ss, bs, bs_size);
+	// printer(ss, ss_size);
 	printf("%s", ss);
 }
 
@@ -244,6 +252,5 @@ int main(int argc, char **argv)
 		if (is_encode) encode(buf, len-1); // -1 len, because I guess of EOF
 		else if (is_decode) decode(buf, len-1); // -1 len, because I guess of EOF
 	}
-	printf("\n");
 	return fclose(stream);
 }
