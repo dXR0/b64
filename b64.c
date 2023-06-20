@@ -194,9 +194,9 @@ int main(int argc, char **argv)
 		size_t arglen = my_strlen(arg);
 		if (is_encode) encode((char *)arg, arglen);
 		else if (is_decode) decode((char *)arg, arglen);
+		printf("\n");
 	}
 	if (from_cmd) {
-		printf("\n");
 		exit(0);
 	}
 
