@@ -243,11 +243,11 @@ int main(int argc, char **argv)
 		int len = ftell(stream);
 		rewind(stream);
 		char buf[len];
-		fgets(buf, len, stream);
-		int ctr = len-1; // -1 len, because I guess of EOF
+		fgets(buf, len+1, stream); // TODO: why +1? 
+		int ctr = len;
 		if (buf[ctr-1] == '\n') --ctr; // if last char is newline, then drop it
-		if (is_encode) encode(buf, len-1);
-		else if (is_decode) decode(buf, len-1);
+		if (is_encode) encode(buf, len);
+		else if (is_decode) decode(buf, len-1); // TODO: why -1?
 	}
 	putchar('\n');
 	return fclose(stream);
