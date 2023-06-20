@@ -93,12 +93,11 @@ void encode(char *buf, int ctr)
 {
 	size_t bs_size = ctr*8;
 	size_t padding = ((6 - (bs_size%6))%6)/2;
-	printf("%x, %d %d\n", buf[0]-buf[1], bs_size, ctr);
 	bs_size += 2*padding;
 	int bs[bs_size];
 	mseti(bs, 0, bs_size);
 	estob(bs, buf, ctr);
-	print_binary(bs, bs_size);
+	// print_binary(bs, bs_size);
 	size_t b64_size = bs_size/6 + padding;
 	char b64[b64_size+1]; // +1 for c-str
 	msetc(b64, '\0', b64_size+1);
@@ -119,14 +118,9 @@ void dstob(int bs[], char *ss, size_t ss_size)
 				break;
 			}
 		}
-		int ones_count = 0;
-		int j = 5; // it's filled in reverse order
-		while(idx >= 0 && ones_count < 1) {
-			if (idx <= 1) ++ones_count;
-			bs[6*i+j] = idx%2;
-			idx/=2;
-			--j;
-		} 
+		for (int j=5; j>=0; --j) {
+			bs[6*i+5-j] = (idx & (1 << j)) ? 1 : 0;
+		}
 	}
 }
 
