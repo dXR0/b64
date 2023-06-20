@@ -65,15 +65,10 @@ void estob(int bs[], char *ss, size_t ss_size)
 {
 	// first byte of 8 needs to be 0;
 	for (int i=0; i<ss_size; ++i) {
-		int ones_count = 0;
-		int j = 7; // it's filled in reverse order
 		char c = ss[i];
-		while(c >= 0 && ones_count < 1) {
-			if (c <= 1) ++ones_count;
-			bs[8*i+j] = c%2;
-			c/=2;
-			--j;
-		} 
+		for (int j=7; j>=0; --j) {
+			bs[8*i+7-j] = (c & (1 << j)) ? 1 : 0;
+		}
 	}
 }
 
@@ -98,12 +93,12 @@ void encode(char *buf, int ctr)
 {
 	size_t bs_size = ctr*8;
 	size_t padding = ((6 - (bs_size%6))%6)/2;
+	printf("%x, %d %d\n", buf[0]-buf[1], bs_size, ctr);
 	bs_size += 2*padding;
 	int bs[bs_size];
 	mseti(bs, 0, bs_size);
-	// print_binary(bs, bs_size);
 	estob(bs, buf, ctr);
-	// print_binary(bs, bs_size);
+	print_binary(bs, bs_size);
 	size_t b64_size = bs_size/6 + padding;
 	char b64[b64_size+1]; // +1 for c-str
 	msetc(b64, '\0', b64_size+1);
