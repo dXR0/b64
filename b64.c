@@ -106,18 +106,20 @@ void encode(char *buf, int ctr)
 	printf("%s", b64);
 }
 
+int find_pos(char target)
+{
+	for (int j=0; j<64; ++j){
+		if (target == B64T[j]) {
+			return j;
+		}
+	}
+	return -1;
+}
+
 void dstob(int bs[], char *ss, size_t ss_size)
 {
 	for (int i=0; i<ss_size; ++i) {
-		// naive method: find the index of the letter
-		// TODO: implement faster searching algorithm
-		int idx = -1;
-		for (int j=0; j<64; ++j){
-			if (ss[i] == B64T[j]) {
-				idx = j;
-				break;
-			}
-		}
+		int idx = find_pos(ss[i]);
 		for (int j=5; j>=0; --j) {
 			bs[6*i+5-j] = (idx & (1 << j)) ? 1 : 0;
 		}
