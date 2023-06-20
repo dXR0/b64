@@ -6,8 +6,11 @@
 #define MAX_STR 256
 #define B64T "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 
-// TODO: cleanup funcs and naming/refactor
-// TODO: test and bugfix
+// MAYBE: improve/change naming(?)
+// MAYBE: test ~~and bugfix~~
+// NOTE: Tried testing, but no convenient solution emerged.
+// 	However, during the testing attempts, I was able to fix some bugs,
+// 	mainly by improving the binary creation
 
 // borrowed from tsoding
 const char *shift(int *argc, char ***argv)
