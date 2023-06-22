@@ -177,12 +177,14 @@ int main(int argc, char **argv)
 	if (argc > 0) {
 		action = shift(&argc, &argv);
 	}
-	const int is_encode = !my_strcmp("encode", action);
-	const int is_decode = !my_strcmp("decode", action);
+	const char *enc_action = "e";
+	const char *dec_action = "d";
+	const int is_encode = !my_strcmp(enc_action, action);
+	const int is_decode = !my_strcmp(dec_action, action);
 
 	if (!is_encode && !is_decode) {
 		printf("unknown action: %s\n", action);
-		printf("allowed: encode decode\n");
+		printf("allowed: %s %s\n", enc_action, dec_action);
 		exit(1);
 	}
 	

@@ -6,7 +6,7 @@ This is a cli tool to encode/decode to/from base64.
 
 ```sh
 $ gcc -o b64 b64.c
-$ ./b64 encode "lorem ipsum" | ./b64 decode
+$ ./b64 e "lorem ipsum" | ./b64 d
 lorem ipsum
 ```
 
@@ -18,47 +18,47 @@ b64 ACTION [ARGUMENT]...
 
 ## Description
 
-There are 2 ACTIONS: `encode` and `decode`.
+There are 2 ACTIONS: `e` to encode and `d` to decode.
 
 There are 4 ways to use `b64`:
 
 * pass ARGUMENTs to `b64`
 ```sh
-$ ./b64 encode "lorem ipsum" test "test2"
+$ ./b64 e "lorem ipsum" test "test2"
 bG9yZW0gaXBzdW0=
 dGVzdA==
 dGVzdDI=
 
-$ ./b64 decode bG9yZW0gaXBzdW0= dGVzdA== dGVzdDI=
+$ ./b64 d bG9yZW0gaXBzdW0= dGVzdA== dGVzdDI=
 lorem ipsum
 test
 test2
 ```
 * read stdin
 ```sh
-$ printf "lorem ipsum" | ./b64 encode
+$ printf "lorem ipsum" | ./b64 e
 bG9yZW0gaXBzdW0=
 
-$ printf "bG9yZW0gaXBzdW0=" | ./b64 decode
+$ printf "bG9yZW0gaXBzdW0=" | ./b64 d
 lorem ipsum
 ```
 * read file, that is piped as stdin
 ```sh
 $ printf "lorem ipsum" > file1
-$ ./b64 encode < file1 > file2
+$ ./b64 e < file1 > file2
 $ cat file2
 bG9yZW0gaXBzdW0=
 
-$ ./b64 decode < file2
+$ ./b64 d < file2
 lorem ipsum
 ```
 * start a REPL, where each input line is encoded(/decoded)
 ```sh
-$ ./b64 encode
+$ ./b64 e
 lorem ipsum
 bG9yZW0gaXBzdW0=
 
-$ ./b64 decode
+$ ./b64 d
 bG9yZW0gaXBzdW0=
 lorem ipsum
 ```
