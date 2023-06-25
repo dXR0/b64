@@ -64,7 +64,7 @@ void printer(char *ss, size_t size)
 		putchar(ss[i]);
 }
 
-void estob(int bs[], char *ss, size_t ss_size)
+void e_stob(int bs[], char *ss, size_t ss_size)
 {
 	// first byte of 8 needs to be 0;
 	for (int i=0; i<ss_size; ++i) {
@@ -75,7 +75,7 @@ void estob(int bs[], char *ss, size_t ss_size)
 	}
 }
 
-void ebtos(char *ss, int bs[], size_t bs_size, size_t padding)
+void e_btos(char *ss, int bs[], size_t bs_size, size_t padding)
 {
 	int k = 0;
 	for (int i=0; i<bs_size; i+=6) {
@@ -99,27 +99,29 @@ void encode(char *buf, int ctr)
 	bs_size += 2*padding;
 	int bs[bs_size];
 	mseti(bs, 0, bs_size);
-	estob(bs, buf, ctr);
+	e_stob(bs, buf, ctr);
 	// print_binary(bs, bs_size);
 	size_t b64_size = bs_size/6 + padding;
 	char b64[b64_size+1]; // +1 for c-str
 	msetc(b64, '\0', b64_size+1);
-	ebtos(b64, bs, bs_size, padding);
+	e_btos(b64, bs, bs_size, padding);
 	// printer(b64, b64_size);
 	printf("%s", b64);
 }
 
 int find_pos(char target)
 {
+	if (target == '=') return -1;
 	for (int j=0; j<64; ++j){
 		if (target == B64T[j]) {
 			return j;
 		}
 	}
-	return -1;
+	printf("invalid base64 character: '%c'\n", target);
+	exit(1);
 }
 
-void dstob(int bs[], char *ss, size_t ss_size)
+void d_stob(int bs[], char *ss, size_t ss_size)
 {
 	for (int i=0; i<ss_size; ++i) {
 		int idx = find_pos(ss[i]);
@@ -129,7 +131,7 @@ void dstob(int bs[], char *ss, size_t ss_size)
 	}
 }
 
-void dbtos(char *ss, int bs[], size_t bs_size)
+void d_btos(char *ss, int bs[], size_t bs_size)
 {
 	int k = 0;
 	for (int i=0; i<bs_size; i+=8) {
@@ -160,11 +162,11 @@ void decode(char *buf, int ctr)
 	size_t bs_size = ss_size*8;
 	int bs[bs_size];
 	mseti(bs, 0, bs_size);
-	dstob(bs, buf, ctr);
+	d_stob(bs, buf, ctr);
 	// print_binary(bs, bs_size);
 	char ss[ss_size+1]; // +1 for c-str
 	msetc(ss,'\0', ss_size+1);
-	dbtos(ss, bs, bs_size);
+	d_btos(ss, bs, bs_size);
 	// printer(ss, ss_size);
 	printf("%s", ss);
 }
@@ -217,6 +219,11 @@ int main(int argc, char **argv)
 			if (c != EOF) {
 				buf[ctr] = c;
 				++ctr;
+			} else if (ctr >= MAX_STR) {
+				if (buf[ctr-1] == '\n') --ctr; // if last char is newline, then drop it
+				if (is_encode) encode(buf, ctr);
+				else if (is_decode) decode(buf, ctr);
+				ctr = 0;
 			} else {
 				if (buf[ctr-1] == '\n') --ctr; // if last char is newline, then drop it
 				if (is_encode) encode(buf, ctr);
@@ -233,6 +240,11 @@ int main(int argc, char **argv)
 			if (c != '\n' && c != EOF) {
 				buf[ctr] = c;
 				++ctr;
+			} else if (ctr >= MAX_STR) {
+				if (is_encode) encode(buf, ctr);
+				else if (is_decode) decode(buf, ctr);
+				ctr=0;
+				putchar('\n');
 			} else {
 				if (is_encode) encode(buf, ctr);
 				else if (is_decode) decode(buf, ctr);
