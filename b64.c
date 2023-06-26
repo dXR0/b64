@@ -31,13 +31,6 @@ int my_strcmp(const char *base, const char *comp)
 	return base[i] - comp[i];
 }
 
-void my_memcpy(char **dest, char **src, size_t size)
-{
-	for(int i=0; i<size; ++i)
-		dest[i] = src[i];
-}
-
-
 int my_strlen(const char *s)
 {
 	int i = 0;
