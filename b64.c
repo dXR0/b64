@@ -2,8 +2,9 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <errno.h>
 
-#define MAX_STR 256
+#define MAX_STR 5 // 256
 #define B64T "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 
 // MAYBE: improve/change naming(?)
@@ -29,6 +30,13 @@ int my_strcmp(const char *base, const char *comp)
 		if (base[i] == '\0') return 0;
 	return base[i] - comp[i];
 }
+
+void my_memcpy(char **dest, char **src, size_t size)
+{
+	for(int i=0; i<size; ++i)
+		dest[i] = src[i];
+}
+
 
 int my_strlen(const char *s)
 {
@@ -219,11 +227,6 @@ int main(int argc, char **argv)
 			if (c != EOF) {
 				buf[ctr] = c;
 				++ctr;
-			} else if (ctr >= MAX_STR) {
-				if (buf[ctr-1] == '\n') --ctr; // if last char is newline, then drop it
-				if (is_encode) encode(buf, ctr);
-				else if (is_decode) decode(buf, ctr);
-				ctr = 0;
 			} else {
 				if (buf[ctr-1] == '\n') --ctr; // if last char is newline, then drop it
 				if (is_encode) encode(buf, ctr);
@@ -233,23 +236,29 @@ int main(int argc, char **argv)
 		}
 	} else if (S_ISCHR(stats_mode)) {
 		int is_newline = 0;
-		char buf[MAX_STR];
+		size_t len = MAX_STR;
+		char *buf = calloc(len, sizeof(char));
 		int ctr = 0;
 		while (1) {
+			if (ctr >= len) {
+				len *= 2;
+				buf = realloc(buf, len);
+				if (!buf) {
+					printf("[ERROR]: %s\n",errno);
+					exit(1);
+				}
+			} 
 			char c = fgetc(stream);
 			if (c != '\n' && c != EOF) {
 				buf[ctr] = c;
 				++ctr;
-			} else if (ctr >= MAX_STR) {
-				if (is_encode) encode(buf, ctr);
-				else if (is_decode) decode(buf, ctr);
-				ctr=0;
-				putchar('\n');
 			} else {
 				if (is_encode) encode(buf, ctr);
 				else if (is_decode) decode(buf, ctr);
 				ctr=0;
 				putchar('\n');
+				free(buf);
+				buf = calloc(len, sizeof(char));
 			}
 		}
 	} else if (S_ISREG(stats_mode)) {
