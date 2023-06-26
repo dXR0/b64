@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <errno.h>
 
-#define MAX_STR 5 // 256
+#define MAX_STR 256
 #define B64T "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 
 // MAYBE: improve/change naming(?)
