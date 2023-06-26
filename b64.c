@@ -220,9 +220,18 @@ int main(int argc, char **argv)
 	// S_ISCHR(stats_mode) - REPL
 	// S_ISREG(stats_mode) - file directed in as stdin, eg ./a.out < file
 	if (S_ISFIFO(stats_mode)) {
-		char buf[MAX_STR];
+		size_t len = MAX_STR;
+		char *buf = calloc(len, sizeof(char));
 		int ctr = 0;
 		while (1) {
+			if (ctr >= len) {
+				len *= 2;
+				buf = realloc(buf, len);
+				if (!buf) {
+					printf("[ERROR]: %s\n",errno);
+					exit(1);
+				}
+			} 
 			char c = fgetc(stream);
 			if (c != EOF) {
 				buf[ctr] = c;
@@ -231,6 +240,7 @@ int main(int argc, char **argv)
 				if (buf[ctr-1] == '\n') --ctr; // if last char is newline, then drop it
 				if (is_encode) encode(buf, ctr);
 				else if (is_decode) decode(buf, ctr);
+				free(buf);
 				break;
 			}
 		}
