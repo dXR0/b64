@@ -275,12 +275,14 @@ int main(int argc, char **argv)
 		fseek(stream, 0, SEEK_END);
 		int len = ftell(stream);
 		rewind(stream);
-		char buf[len];
-		fgets(buf, len+1, stream); // TODO: why +1? 
-		int ctr = len;
-		if (buf[ctr-1] == '\n') --ctr; // if last char is newline, then drop it
+		char *buf = calloc(len, sizeof(char));
+		for (int i=0; i<len; ++i) {
+			buf[i] = fgetc(stream);
+		}
+		if (buf[len-1] == '\n') --len; // if last char is newline, then drop it
 		if (is_encode) encode(buf, len);
-		else if (is_decode) decode(buf, len-1); // TODO: why -1?
+		else if (is_decode) decode(buf, len);
+		free(buf);
 	}
 	putchar('\n');
 	return fclose(stream);
